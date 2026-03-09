@@ -66,12 +66,12 @@
       color: #9ca3af;
       margin-bottom: 16px;
     }
-    .book-wrapper { perspective: 1600px; margin-top: 8px; }
+    .book-wrapper { perspective: 3600px; margin-top: 8px; }
     .book {
       position: relative;
       margin: 0 auto;
-      max-width: 720px;
-      height: 420px;
+      max-width: 1720px;
+      height: 1020px;
       transform-style: preserve-3d;
     }
     .cover {
@@ -827,18 +827,19 @@ und darum schreib ich dieses Gedicht. `
     }
 
     function setLang(lang) {
-      if (!poems[lang]) return;
-      state.lang = lang;
-      state.index = 0;
-      langButtons.forEach(btn => {
+    	if (!poems[lang]) return;
+    	state.lang = lang;
+    	state.index = 0;
+    	langButtons.forEach(btn => {
         btn.classList.toggle("active", btn.dataset.lang === lang);
       });
       updatePage();
     }
 
     function openBook() {
-      coverEl.classList.add("hidden");
-      innerEl.classList.add("visible");
+		coverEl.classList.add("hidden");
+    	innerEl.classList.add("visible");
+		document.body.style.cursor = "default";
     }
 
     coverEl.addEventListener("click", openBook);
@@ -888,6 +889,7 @@ und darum schreib ich dieses Gedicht. `
   </script>
 </body>
 </html>
+
 
 
 
