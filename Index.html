@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Silas Hug · Poetry Book</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root {
+      --bg: #111827;
+      --page-bg: #fdfaf3;
+      --accent: #8b5cf6;
+      --accent-dark: #5b21b6;
+      --text-main: #111827;
+      --text-muted: #6b7280;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #1f2937, #020617);
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .app { max-width: 960px; width: 100%; }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    header h1 {
+      font-size: 1.5rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .lang-toggle {
+      display: flex;
+      gap: 8px;
+      background: rgba(15,23,42,0.8);
+      padding: 4px;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.4);
+    }
+    .lang-btn {
+      border: none;
+      background: transparent;
+      color: #e5e7eb;
+      padding: 6px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      transition: all 0.15s ease;
+    }
+    .lang-btn.active {
+      background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+      color: white;
+      box-shadow: 0 8px 20px rgba(129,140,248,0.4);
+    }
+    .subtitle {
+      font-size: 0.9rem;
+      color: #9ca3af;
+      margin-bottom: 16px;
+    }
+    .book-wrapper { perspective: 1600px; margin-top: 8px; }
+    .book {
+      position: relative;
+      margin: 0 auto;
+      max-width: 720px;
+      height: 420px;
+      transform-style: preserve-3d;
+    }
+    .cover {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at top, #111827, #020617);
+      border-radius: 16px;
+      border: 1px solid rgba(148,163,184,0.5);
+      box-shadow: 0 30px 80px rgba(15,23,42,0.9);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: transform 0.7s ease, opacity 0.5s ease;
+      transform-origin: left;
+    }
+    .cover.hidden {
+      transform: rotateY(-110deg);
+      opacity: 0;
+      pointer-events: none;
+    }
+    .cover-title {
+      font-size: 1.8rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+    }
+    .cover-line {
+      width: 120px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #e5e7eb, transparent);
+    }
+    .cover-hint {
+      font-size: 0.85rem;
+      color: #9ca3af;
+    }
+    .inner {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid rgba(148,163,184,0.4);
+      background: #111827;
+      box-shadow: 0 24px 60px rgba(15,23,42,0.9);
+      opacity: 0;
+      transform: translateY(6px) scale(0.98);
+      transition: opacity 0.4s ease 0.3s, transform 0.4s ease 0.3s;
+    }
+    .inner.visible {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    .spine {
+      width: 40px;
+      background: linear-gradient(to bottom, #0f172a, #020617);
+      border-right: 1px solid rgba(15,23,42,0.9);
+      position: relative;
+    }
+    .spine::before {
+      content: "";
+      position: absolute;
+      inset: 16px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(51,65,85,0.9);
+    }
+    .content {
+      flex: 1;
+      background: radial-gradient(circle at top, #f9fafb, #e5e7eb);
+      padding: 24px 28px;
+      display: flex;
+      flex-direction: column;
+    }
+    .page-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    .poem-title {
+      font-family: "Georgia", "Times New Roman", serif;
+      font-size: 1.4rem;
+      color: var(--text-main);
+      margin-bottom: 10px;
+    }
+    .poem-lang {
+      font-size: 0.7rem;
+      color: var(--accent-dark);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .poem-body {
+      flex: 1;
+      font-family: "Georgia", "Times New Roman", serif;
+      font-size: 0.98rem;
+      line-height: 1.7;
+      color: #111827;
+      white-space: pre-line;
+    }
+    .page-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 16px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    .nav { display: flex; gap: 8px; }
+    .nav button {
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.8);
+      background: white;
+      color: #111827;
+      padding: 4px 10px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+    .nav button:hover { background: #e5e7eb; }
+    .nav button:disabled { opacity: 0.4; cursor: default; }
+    .page-indicator span { font-variant-numeric: tabular-nums; }
+
+    @media (max-width: 720px) {
+      .book { height: 80vh; max-height: 520px; }
+      .spine { display: none; }
+      .content { padding: 20px 18px; }
+      .poem-body { font-size: 0.92rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>Silas Hug · Poems</h1>
+      <div class="lang-toggle">
+        <button class="lang-btn active" data-lang="en">English</button>
+        <button class="lang-btn" data-lang="de">Deutsch</button>
+      </div>
+    </header>
+
+    <p class="subtitle">
+      Tap the cover to open the book. Swipe on touch devices or use the arrows to move between poems.
+    </p>
+
+    <div class="book-wrapper">
+      <div class="book">
+        <div class="cover" id="cover">
+          <div class="cover-title">Poetry</div>
+          <div class="cover-line"></div>
+          <div class="cover-hint">Tap to open · Swipe / click arrows to turn pages</div>
+        </div>
+
+        <div class="inner" id="inner">
+          <div class="spine"></div>
+          <div class="content">
+            <div class="page-meta">
+              <span id="seriesLabel">Selected poems</span>
+              <span class="poem-lang" id="langLabel">English</span>
+            </div>
+
+            <div class="poem">
+              <div class="poem-title" id="poemTitle">Title</div>
+              <div class="poem-body" id="poemBody">
+                Poem text will appear here.
+              </div>
+            </div>
+
+            <div class="page-footer">
+              <div class="nav">
+                <button id="prevBtn" disabled>&larr; Previous</button>
+                <button id="nextBtn">Next &rarr;</button>
+              </div>
+              <div class="page-indicator">
+                <span id="pageNumber">1</span>/<span id="pageTotal">1</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const poems = {
+      en: [
+        {
+          title: "My Roots",
+          text:
+`I knew I just needed to move on,
+As all my hope had already gone.
+And after a lot of heavy disputes,
+I decided to go back to my roots.
+
+And so I reflected about my past,
+Discovering memories that had remained,
+All those memories were now unchained,
+Full of Joy from times that have passed.
+
+Most of my memories included my sister,
+I had promised that I would always assist her,
+Every weekend I learned with her for school,
+She was often kind but sometimes cruel.
+
+Despite that, I never lost my mind,
+She could be cruel, but I’d stay kind.
+Till today I kept helping her with all,
+I would never allow her to fail or to fall.
+
+And only now, as I reflect here,
+Something finally became clear,
+She has always been the key to joy,
+Since I was still just a little boy.
+
+The oldest memory I can remember,
+Has been guiding me like burning ember,
+Our small blanket where she would fall asleep,
+I would always guard her like something to keep.`
+        },
+        {
+          title: "Poem of Will",
+          text:
+`When I grew up, I always wished
+For many different things to come true,
+But my hopes were abruptly crushed,
+As pain flooded my life, but I went through.
+
+For a long time, I failed to find sleep,
+Lay awake and watched the light blink green
+And listened to a periodic beep,
+Thinking about what could have been.
+
+I had almost given up, I seemed ready to break
+But somehow, I managed to move on.
+After all I might have been weak
+But my will was still strong.
+
+After passing this trial I knew,
+It may come whatever comes, I will get along.
+Because even when being rejected by society I knew,
+I might weaken but my will remains strong.
+
+Sometimes I still get haunted by the pain
+Or other things that make me cry all day long.
+But I keep telling myself again and again,
+It doesn’t matter how weak I am, my will is strong.
+
+My cheerless, bleak life always remained stable
+Because the power of my will stays unbreakable.`
+        },
+	{
+          title: "A friend of mine ",
+          text:
+`I was young when without a sign, 
+
+The father of a friend of mine 
+
+Has not woken up from sleep, 
+
+This memory is sitting deep. 
+
+ 
+
+Just one week before 
+
+His dad was standing at their door, 
+
+He greeted me and let me in 
+
+On his face a happy grin. 
+
+ 
+
+After playing with my friend 
+
+He said he feared that when it does end, 
+
+The son he has so arduously grown 
+
+Would have to care for himself alone. 
+
+ 
+
+So I promised him I would oversee,  
+
+that I would take care of him to a certain degree 
+
+and won’t allow that he throws away 
+
+all his father had built up to that day. 
+
+ 
+
+But our contact has gotten less 
+
+And I must confess 
+
+It all played out as his father has feared 
+
+Everything his father prepared has slowly disappeared 
+
+  
+
+And wherever I go 
+
+Deep down I know 
+
+That I had badly failed 
+
+And now my soul is ailed `
+        },
+	{
+          title: "Sanity",
+          text:
+`I dont know yet where I belong, 
+
+As I´m losing my faith in humanity  
+
+and it makes me feel completely wrong, 
+
+It makes me wonder about my Sanity. 
+
+ 
+
+In the past, I´ve witnessed a lot, 
+
+And I often wish I had forgot. 
+
+I see things different to what they are, 
+
+Imagining stories that seem very bizarre. 
+
+ 
+
+It happens even in my normal life 
+
+And hits me like a sharpened knife, 
+
+I hear things that were never said 
+
+And with the time, its making me mad. 
+
+ 
+
+I often ask myself what the true reason is, 
+
+Why do I start hallucinating? 
+
+The things I see seem to be some old memories 
+
+Which my brain keeps illuminating. 
+
+ 
+
+Those moments of imagination need to stop, 
+
+There are some memories I need to drop 
+
+As they´re breaking me like hardened clay 
+
+That gets smacked against a wall, 
+
+If all those memories are going to stay, 
+
+Then my Sanity will fall.`
+        },
+	{
+          title: "The malfunction of memories ",
+          text:
+`Even though they had happened lately, 
+
+there are things I cannot remember, 
+
+and some others not more than slightly, 
+
+like a fading fire, burning on in the ember. 
+
+ 
+
+But that’s how it is, it’s nothing bad, 
+
+Sometimes you might even be glad 
+
+That you can easily forget a bad day, 
+
+Because memories are meant to fade away. 
+
+ 
+
+Just like the ember of the fire, 
+
+Just like the traces in the snow 
+
+Most memories will someday expire 
+
+and leave behind a pleasant glow. 
+
+ 
+
+But there is a malfunction within my brain, 
+
+Causing me so much mental pain, 
+
+Because all my bad memories of the past, 
+
+They were never supposed to last.`
+        },
+	{
+          title: "Changing Weather ",
+          text:
+`The sun is shining over the valley, 
+
+Children are playing in the alley, 
+
+Besides them is standing their warden 
+
+And I am sleeping in my garden.  
+
+ 
+
+As long as there is a shining sun,  
+
+The whole village is having fun, 
+
+But someday it will start to rain, 
+
+And that will cause the village pain. 
+
+ 
+
+The rain is falling into the valley, 
+
+Nobody is playing in the alley, 
+
+Everybody has creeped back home, 
+
+Hiding inside their private dome. 
+
+ 
+
+As long as people hide from the rain, 
+
+The whole village is suffering pain. 
+
+If you want to, once again, have fun, 
+
+You must search for the shining sun. 
+
+ 
+
+As soon as the weather starts to change, 
+
+You must follow the shining sun’s motion 
+
+And just keep going, nothing is out of range, 
+
+Even if you need to cross the biggest Ocean.`
+        },
+	{
+          title: "The Story of My Life",
+          text:
+`Every Summer, as a little Kid, I used to have fun,  
+
+playing with a ball below the descending sun, 
+
+And every summer I could not await to go outside, 
+
+In these wonderful times I almost never cried. 
+
+ 
+
+But one summer, in the middle of a walk it came, 
+
+I felt a painful strike, and it struck me down, 
+
+I could not move, I thought I would drown, 
+
+And since then my Life was never again the same. 
+
+ 
+
+That summer of 2009, when I needed it the most,  
+
+Nobody was there for me, nobody took me seriously, 
+
+And so I began to behave more and more mysteriously, 
+
+Starting to feel like I was just a ghost. 
+
+ 
+
+Luckily, just a few months later, 
+
+When the pain was even greater, 
+
+My mother realised that something was wrong, 
+
+But the path of healing was still very long. 
+
+ 
+
+The days passed and I let them go by, 
+
+Sometimes looking far away into the Sky, 
+
+Still feeling like a ghost, with no reason to stay, 
+
+My heart corrupted and my feelings were fading away. 
+
+ 
+
+Eventually, I was healed through a long surgery, 
+
+Which took place one day before my 7th anniversary, 
+
+And so, the next day, a new chapter began for me 
+
+And I looked forward, full of hope about what might be.`
+        },
+	{
+          title: "The Story of my Life - Part 2",
+          text:
+`And so, I started to recover, but that took long, 
+
+The days went by and I no longer felt wrong, 
+
+As I was fighting, I started listening a song, 
+
+Which talks about searching where you belong. 
+
+ 
+
+My recovery went well, and so I was free 
+
+And became happy again, full of emotion, 
+
+Never worrying what might happen to me, 
+
+Looking forward, I was always in motion. 
+
+ 
+
+In that time, my hopes were high, 
+
+Almost feeling like I could fly, 
+
+Sometimes remembering that beautiful song, 
+
+Thinking about where I will someday belong. 
+
+ 
+
+I was too young to feel wrong, 
+
+Letting the days just go along, 
+
+I was at a place I didn’t belong, 
+
+And deep down, this made me strong. 
+
+ 
+
+My heart was still weak, my feelings were dim, 
+
+But deep down, my Mind was growing strong. 
+
+Now I know the heart is the weakest limb, 
+
+But my mind has grown strong because of that song. 
+
+ 
+
+The years went by, 2015 came, 
+
+And my life was feeling the same 
+
+it felt as it was before disaster stroke, 
+
+It felt like, after that nightmare, I awoke.`
+        },
+	{
+          title: "The Story of my Life - Part 3",
+          text:
+`It was wonderful, but my Joy did not last long, 
+
+At the beginning of 2016, they said something was wrong. 
+
+And so, I had another surgery, and the pain was back, 
+
+Sadness overwhelmed me, I was about to crack. 
+
+ 
+
+My Hope was destroyed, it all fell apart, 
+
+But the hardest hit took my heart, 
+
+All my Joy, all those emotions vanished, 
+
+And I finally realised that I was banished. 
+
+ 
+
+I was banished from my place full of Joy, 
+
+I was never meant to be here and Enjoy, 
+
+And once again I remembered that song, 
+
+I must find my place, find where I belong. 
+
+ 
+
+As I recovered from surgery, I lay awake, 
+
+Knowing that my heart is about to break, 
+
+Knowing that my mind is still strong,  
+
+And that I want to find somewhere I belong.`
+        }
+      ],
+      de: [
+        {
+          title: "Das Kreuzfahrtschiff",
+          text:
+`Wunderschön soll es hier sein,
+Gourmet-Essen und teurer Wein,
+auch bequeme Stühle hat es hier,
+und keiner benimmt sich wie ein Tier.
+
+Es sei so schön, man soll das Leben
+geniessen auf dem Kreuzfahrtschiff.
+Das Schiff steht still, und direkt daneben
+liegt ein wunderschönes Korallenriff.
+
+Mir wird gesagt, schöner geht’s nicht,
+aber Wolken verdunkeln die Sicht,
+denn alles Schöne wirkt so trist,
+wenn das Schiff am Sinken ist.`
+        },
+        {
+          title: "Der Deutschtext",
+          text:
+`Mittwochmorgen, ich wache auf
+und bin sogleich deprimiert drauf.
+Am Frühstückstisch während dem Essen
+kommt ein Gefühl auf, ich hätte was vergessen,
+deshalb denke ich lange nach wie besessen,
+was habe ich denn bloss vergessen?
+Doch ich komme trotz allem Überlegen nicht drauf,
+muss jetzt auf den Bus und drum mach ich die Türe auf.
+
+Ich bin nun also unterwegs zur Haltestelle hin
+und frage mich, ob ich etwa spinn,
+die Strassenlampen erzeugen einen düsteren Schein
+und egal wie sehr ich nachdenke, es fällt mir nicht ein.
+Was habe ich bloss vergessen? Ach, solch eine Pein,
+egal wie lange ich denke, die Antwort bleibt geheim.
+Das ist sicherlich kein schöner Tagesbeginn,
+wo führt das alles wohl noch hin?
+
+An der Wand des Gemeindehauses konnte ich lesen,
+am Wochenende war eine Abstimmung gewesen.
+Der Bus hielt an, ich stieg gerade ein und setze mich,
+als mich erneut das bedrückende Gefühl erschlich.
+Mir fällt die Antwort nicht ein, es ist so entsetzlich.
+Doch plötzlich, aus dem Nichts, trifft mich der Schlag und ich erblich,
+mir fiel es nämlich wieder ein, ich armes Wesen!
+Als Hausaufgabe hatte ich einen Deutschtext zu lesen!`
+        },
+	{
+          title: "Verwitterung",
+          text:
+`Mir fällt oft das Handy runter,  
+
+doch ich blieb dabei stets munter, 
+
+denn ich weiss, da ist’ne Hülle dran,  
+
+dank welcher nichts kaputt gehn kann. 
+
+ 
+
+Die Hülle erfüllte ihre Pflicht, 
+
+und schützte das Handy jederzeit, 
+
+doch leider schützte sie sich nicht, 
+
+und darum ist es jetzt so weit. 
+
+ 
+
+Die Belastung wurde zu gross 
+
+Jetzt werd ich gefragt, was bloss 
+
+mir meine Hülle denn noch nützt, 
+
+wenn sie nicht mehr richtig schützt. 
+
+ 
+
+Dass meine Hülle mit der Zeit zerbricht, 
+
+dieser Gedanke vertrübt mir mein Gesicht, 
+
+er blendet meine einst klare Sicht, 
+
+und darum schreib ich dieses Gedicht. `
+        }
+      ]
+    };
+
+    const state = { lang: "en", index: 0 };
+
+    const coverEl    = document.getElementById("cover");
+    const innerEl    = document.getElementById("inner");
+    const titleEl    = document.getElementById("poemTitle");
+    const bodyEl     = document.getElementById("poemBody");
+    const pageNumEl  = document.getElementById("pageNumber");
+    const pageTotEl  = document.getElementById("pageTotal");
+    const langLabel  = document.getElementById("langLabel");
+    const prevBtn    = document.getElementById("prevBtn");
+    const nextBtn    = document.getElementById("nextBtn");
+    const langButtons = document.querySelectorAll(".lang-btn");
+
+    function currentList() {
+      return poems[state.lang] || [];
+    }
+
+    function updatePage() {
+      const list = currentList();
+      const poem = list[state.index];
+      if (!poem) return;
+
+      titleEl.textContent = poem.title;
+      bodyEl.textContent = poem.text;
+      pageNumEl.textContent = state.index + 1;
+      pageTotEl.textContent = list.length;
+      langLabel.textContent = state.lang === "en" ? "English" : "Deutsch";
+
+      prevBtn.disabled = state.index === 0;
+      nextBtn.disabled = state.index === list.length - 1;
+    }
+
+    function setLang(lang) {
+      if (!poems[lang]) return;
+      state.lang = lang;
+      state.index = 0;
+      langButtons.forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.lang === lang);
+      });
+      updatePage();
+    }
+
+    function openBook() {
+      coverEl.classList.add("hidden");
+      innerEl.classList.add("visible");
+    }
+
+    coverEl.addEventListener("click", openBook);
+
+    prevBtn.addEventListener("click", () => {
+      if (state.index > 0) {
+        state.index--;
+        updatePage();
+      }
+    });
+
+    nextBtn.addEventListener("click", () => {
+      if (state.index < currentList().length - 1) {
+        state.index++;
+        updatePage();
+      }
+    });
+
+    langButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        setLang(btn.dataset.lang);
+      });
+    });
+
+    let touchStartX = null;
+    innerEl.addEventListener("touchstart", e => {
+      touchStartX = e.changedTouches[0].clientX;
+    });
+    innerEl.addEventListener("touchend", e => {
+      if (touchStartX === null) return;
+      const dx = e.changedTouches[0].clientX - touchStartX;
+      const threshold = 40;
+      if (dx > threshold && !prevBtn.disabled) {
+        state.index--;
+        updatePage();
+      } else if (dx < -threshold && !nextBtn.disabled) {
+        state.index++;
+        updatePage();
+      }
+      touchStartX = null;
+    });
+
+    updatePage();
+  </script>
+</body>
+</html>
