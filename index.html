@@ -66,11 +66,11 @@
       color: #9ca3af;
       margin-bottom: 16px;
     }
-    .book-wrapper { perspective: 2600px; margin-top: 8px; }
+    .book-wrapper { perspective: 2000px; margin-top: 8px; }
     .book {
       position: relative;
       margin: 0 auto;
-      max-width: 1920px;
+      max-width: 920px;
       height: 2520px;
       transform-style: preserve-3d;
     }
@@ -79,7 +79,7 @@
       inset: 0;
       background: radial-gradient(circle at top, #111827, #020617);
       border-radius: 36px;
-      border: 1px solid rgba(148,163,184,0.5);
+      border: 5px solid rgba(148,163,184,0.5);
       box-shadow: 0 30px 80px rgba(15,23,42,0.9);
       display: flex;
       flex-direction: column;
@@ -158,12 +158,12 @@
     }
     .poem-title {
       font-family: "Georgia", "Times New Roman", serif;
-      font-size: 1.15rem;
+      font-size: 1.05rem;
       color: var(--text-main);
       margin-bottom: 10px;
     }
     .poem-lang {
-      font-size: 0.5rem;
+      font-size: 0.45rem;
       color: var(--accent-dark);
       letter-spacing: 0.12em;
       text-transform: uppercase;
@@ -171,8 +171,8 @@
     .poem-body {
       flex: 1;
       font-family: "Georgia", "Times New Roman", serif;
-      font-size: 0.75rem;
-      line-height: 1.7;
+      font-size: 0.65rem;
+      line-height: 1.6;
       color: #111827;
       white-space: pre-line;
     }
@@ -202,8 +202,8 @@
     .nav button:disabled { opacity: 0.4; cursor: default; }
     .page-indicator span { font-variant-numeric: tabular-nums; }
 
-    @media (max-width: 2620px) {
-      .book { height: 80vh; max-height: 2920px; }
+    @media (max-width: 1620px) {
+      .book { height: 80vh; max-height: 3920px; }
       .spine { display: none; }
       .content { padding: 20px 18px; }
       .poem-body { font-size: 0.8rem; }
@@ -221,7 +221,7 @@
     </header>
 
     <p class="subtitle">
-      Tap the cover to open the book. Swipe on touch devices or use the arrows to move between poems.
+      Tap the Edge of the cover to open the book. Swipe on touch devices or use the arrows to move between poems.
     </p>
 
     <div class="book-wrapper">
@@ -703,6 +703,7 @@ und darum schreib ich dieses Gedicht. `
   </script>
 </body>
 </html>
+
 
 
 
